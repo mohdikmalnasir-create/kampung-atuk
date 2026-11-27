@@ -6,7 +6,7 @@ Permainan web 3D untuk sesi terapi carakerja (OT) kanak-kanak 4 hingga 7 tahun. 
 
 Main di sini / Play here: https://mohdikmalnasir-create.github.io/kampung-atuk/
 
-> **Status: prototaip 0.10.0 untuk semakan pakar.** Bukan alat diagnosis. Analisis ialah pemerhatian daripada data permainan; keputusan klinikal dibuat oleh jurupulih carakerja bertauliah bersama penilaian formal.
+> **Status: prototaip 0.10.1 untuk semakan pakar.** Bukan alat diagnosis. Analisis ialah pemerhatian daripada data permainan; keputusan klinikal dibuat oleh jurupulih carakerja bertauliah bersama penilaian formal.
 
 ## Ciri utama
 

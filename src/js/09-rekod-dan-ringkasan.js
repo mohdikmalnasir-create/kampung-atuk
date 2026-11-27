@@ -28,7 +28,7 @@ function showEnd({title, para, stats, listTitle, rows, again=true, menuLabel=T('
 function stationDone(rec, title, para, stats){
   sfx.win();
   const nm = $('nama').value.trim();
-  setTimeout(()=>speak(T('Syabas') + (nm ? ', ' + nm : '') + '!'), 700);
+  setTimeout(()=>speak(T('Syabas') + '!'), 700);
   day.done.add(station.id); day.acts.push([station.nama + (rec.mod === 'rehat' ? '' : ' T' + (rec.tahap || level.n)), rec.mod === 'rehat' ? (rec.kitaran + T(' kitaran')) : rec.acc + '%']);
   const mm = missionDone(station.id, rec);
   if (mm){ setTimeout(()=>{ toast(mm); if (day.hadiah && mm.indexOf(day.hadiahNama || '§') >= 0) speak(mm); }, 1800); }

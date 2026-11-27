@@ -179,6 +179,35 @@ log('saved after unnamed day', store['ka.sesi']||'(none)');
  click('lenSeg',{len:'panjang'}); fire('adBtn','click'); log('opts', store['ka.tempoh'], store['ka.adaptif']);
  click('go'); click('faces',{f:'gembira'}); goTo(-6,5); fire('stGo','click'); log('panjang siram', el('siMsg').textContent);
  fire('siQuit','click'); click('lenSeg',{len:'pendek'}); fire('adBtn','click');
+ if(process.env.XSS){
+  log('\n=== XSS ===');
+  const PAY='<img src=x onerror=alert(1)>', PAY2='"><svg onload=alert(2)>';
+  el('nama').value=PAY; fire('nama','input');
+  click('go'); el('cnName').value=PAY2; fire('cnName','input'); el('cnChk').checked=true; fire('cnChk','change'); fire('cnYes','click');
+  click('faces',{f:'gembira'}); goTo(-6,5); fire('stGo','click');
+  for(let p=0;p<5;p++){ fire('siHold','pointerdown',{}); let g=0; while(g<600){ step(); g++; const wy=+el('water')._attrs.y, bt=+el('bandTop')._attrs.y1, bb=+el('bandBot')._attrs.y1; if(wy<(bt+bb)/2) break; } fire('siHold','pointerup',{}); step(40); }
+  fire('menu','click'); fire('stop','click'); click('faces',{f:'tenang'}); fire('menu','click');
+  // forged backup with payloads in every field, plus prototype-pollution keys and a huge record count
+  const evil={app:'kampung-atuk', sesi:[{mod:'<b>x</b>',nama:PAY,d:PAY2,tahap:PAY,s:PAY,acc:PAY,salah:PAY,warna:PAY,ts:1},{mod:'siram',nama:PAY,d:'1 Jan',tahap:'<i>9</i>',s:'"><x>',acc:'<u>',ts:2},{mod:'perasaan',nama:PAY,masuk:PAY,keluar:'__proto__',ts:3}], persetujuan:{'__proto__':{polluted:1},[PAY]:{penjaga:PAY2,hubungan:PAY,tarikh:PAY,ts:9e15,versi:'1.0'}}, nota:{[PAY]:PAY2,'__proto__':'x'}};
+  fire('masterBtn','click'); el('pinIn').value='1234'; fire('pinForm','submit',{preventDefault(){}}); await new Promise(r=>setTimeout(r,50));
+  fire('impPaste','click'); el('dataBox').value=JSON.stringify(evil); fire('impGo','click'); log('import', el('mMsg').textContent);
+  el('mSel').value=PAY; fire('mSel','change',{target:{value:PAY}});
+  await new Promise(r=>{ fire('mCopy','click'); setTimeout(r,20); });
+  log('polluted Object.prototype?', ({}).polluted===1);
+  const bad=[]; for(const [id,e] of Object.entries(els)){ const h=String(e.innerHTML||''); if(/<img src=x|<svg onload|<b>x<\/b>|<i>9<\/i>|<u>|"><x>/.test(h)) bad.push(id+': '+h.slice(0,120)); }
+  log('UNESCAPED SINKS', bad.length); bad.forEach(b=>log('  ', b));
+  log('mSum (textContent)', el('mSum').textContent.slice(0,90));
+  fire('mClose','click');
+  const imported=JSON.parse(store['ka.sesi']).filter(r=>r.nama===PAY); log('imported cleaned', JSON.stringify(imported.map(r=>({mod:r.mod,tahap:r.tahap,s:r.s,acc:r.acc}))));
+  log('bad mod dropped', !JSON.parse(store['ka.sesi']).some(r=>r.mod==='<b>x</b>'));
+  // PIN brute force
+  fire('masterBtn','click'); for(let i=0;i<6;i++){ el('pinIn').value='000'+i; fire('pinForm','submit',{preventDefault(){}}); await new Promise(r=>setTimeout(r,20)); }
+  log('pin after 6 wrong', el('pinMsg').textContent, '| locked until set', !!store['ka.pinLock']);
+  el('pinIn').value='1234'; fire('pinForm','submit',{preventDefault(){}}); await new Promise(r=>setTimeout(r,20)); log('correct pin during lock opens?', !el('master').hidden && el('pinMsg').textContent==='');
+  store['ka.pinLock']='0'; fire('pinCancel','click');
+  // speech never contains the child's name
+  log('spoken with name', spoken.filter(t=>t.includes('<img')||t.includes('Danish')||t.includes('Ayu')).length);
+ }
 
  // export / import round trip
  fire('masterBtn','click'); el('pinIn').value='1234'; fire('pinForm','submit',{preventDefault(){}}); await new Promise(r=>setTimeout(r,50));

@@ -1,7 +1,7 @@
 /* ---------- PDPA: parent consent, once per child per notice version ---------- */
 const CONSENT_VER = '1.0';
 function consents(){ try { const o = JSON.parse(store.get('ka.consent','{}')); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch(e) { return {}; } }
-function consentFor(n){ const c = consents()[n]; if (!c || c.versi !== CONSENT_VER || Date.now() - (+c.ts||0) > 365*864e5) return null; return c; }
+function consentFor(n){ const all = consents(), c = Object.prototype.hasOwnProperty.call(all, n) ? all[n] : null, age = Date.now() - (+c?.ts || 0); if (!c || typeof c !== 'object' || c.versi !== CONSENT_VER || age < -864e5 || age > 365*864e5) return null; return c; }
 function consentLine(n){ const c = consentFor(n); return c ? c.penjaga + ' (' + c.hubungan + '), ' + c.tarikh : ''; }
 function updConsentStatus(){
   const n = $('nama').value.trim(), el = $('cst'), c = consentFor(n);
@@ -19,6 +19,7 @@ $('cnChk').addEventListener('change', cnValid);
 $('cnName').addEventListener('input', cnValid);
 $('cnYes').addEventListener('click', ()=>{
   const n = $('nama').value.trim(), all = consents();
+  if (BAD_KEYS.has(n)){ recording = false; beginDay(); return; }
   all[n] = {penjaga:$('cnName').value.trim(), hubungan:$('cnRel').value, tarikh:new Date().toLocaleDateString('ms-MY',{day:'numeric',month:'short',year:'numeric'}), ts:Date.now(), versi:CONSENT_VER};
   store.set('ka.consent', JSON.stringify(all)); recording = true; updConsentStatus(); beginDay();
 });

@@ -29,8 +29,16 @@ async function submitPin(){
     if (p !== $('pin2').value.trim()) return msgPin(T('PIN tidak sama. Cuba lagi.'), true);
     store.set('ka.pin', await hashPin(p)); openMaster(); return;
   }
-  if (await hashPin(p) === store.get('ka.pin','')) openMaster();
-  else { msgPin(T('PIN salah.'), true); $('pinIn').value = ''; }
+  const lock = +store.get('ka.pinLock', 0);
+  if (Date.now() < lock){ msgPin(T('Terlalu banyak cubaan. Cuba lagi selepas ') + Math.ceil((lock - Date.now())/1000) + T(' saat.'), true); return; }
+  if (await hashPin(p) === store.get('ka.pin','')){ store.set('ka.pinFail', 0); store.set('ka.pinLocks', 0); openMaster(); return; }
+  const fails = +store.get('ka.pinFail', 0) + 1;
+  $('pinIn').value = '';
+  if (fails >= 5){
+    const n = +store.get('ka.pinLocks', 0) + 1, wait = Math.min(30*Math.pow(2, n-1), 3600);
+    store.set('ka.pinLocks', n); store.set('ka.pinFail', 0); store.set('ka.pinLock', Date.now() + wait*1000);
+    msgPin(T('Terlalu banyak cubaan. Cuba lagi selepas ') + wait + T(' saat.'), true);
+  } else { store.set('ka.pinFail', fails); msgPin(T('PIN salah.'), true); }
 }
 $('pinForm').addEventListener('submit', e=>{ e.preventDefault(); submitPin(); });
 $('pinCancel').addEventListener('click', ()=>{ hideOverlays(); $('start').hidden = false; });
@@ -239,24 +247,53 @@ $('expBtn').addEventListener('click', ()=>{
   $('mMsg').textContent = (saved ? T('Fail sandaran dimuat turun jika pelayar membenarkan. ') : '') + T('Teks sandaran juga dipaparkan di bawah: salin dan simpan di tempat selamat. Ia mengandungi data peribadi sensitif murid.');
   try { box.select(); } catch(e) {}
 });
+const IMPORT_MAX = 2000, IMPORT_BYTES = 5*1024*1024, BAD_KEYS = new Set(['__proto__','constructor','prototype']);
+const MODS = new Set(['warna','arahan','siram','jejak','rama','rehat','perasaan']), FEEL_IDS = new Set(['gembira','tenang','penat','risau','marah']);
+const cleanStr = (v, n) => typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, '').slice(0, n) : '';
+const cleanNum = (v, lo, hi) => { const x = Number(v); return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : 0; };
+function cleanRec(r){
+  if (!r || typeof r !== 'object' || !MODS.has(r.mod)) return null;
+  const o = {mod:r.mod, nama:cleanStr(r.nama, 40), d:cleanStr(r.d, 20), ts:cleanNum(r.ts, 0, Date.now() + 864e5), v:cleanStr(r.v, 12)};
+  if (r.mod === 'perasaan'){ o.masuk = FEEL_IDS.has(r.masuk) ? r.masuk : ''; o.keluar = FEEL_IDS.has(r.keluar) ? r.keluar : ''; return o; }
+  ['tahap','tahapMula','tahapAkhir'].forEach(k=>{ if (r[k] !== undefined) o[k] = cleanNum(r[k], 1, 3); });
+  o.s = cleanNum(r.s, 0, 36000); o.acc = cleanNum(r.acc, 0, 100); o.salah = cleanNum(r.salah, 0, 9999);
+  ['urutan','warnaSalah','ulang','n','tekan','pasu','dalam','luar','laluan','luput','lebah','rt','kitaran','naik','turun'].forEach(k=>{ if (r[k] !== undefined) o[k] = cleanNum(r[k], 0, 1e7); });
+  if (typeof r.warna === 'string') o.warna = cleanStr(r.warna, 20);
+  if (['pendek','sederhana','panjang'].includes(r.tempoh)) o.tempoh = r.tempoh;
+  if (r.cb) o.cb = 1;
+  return o;
+}
+function cleanConsent(c){
+  if (!c || typeof c !== 'object') return null;
+  const ts = cleanNum(c.ts, 0, Date.now() + 864e5);
+  if (!ts || c.versi !== CONSENT_VER) return null;
+  return {penjaga:cleanStr(c.penjaga, 40), hubungan:['Ibu','Bapa','Penjaga sah'].includes(c.hubungan) ? c.hubungan : '', tarikh:cleanStr(c.tarikh, 20), ts, versi:CONSENT_VER};
+}
 function mergeData(txt){
   let d;
+  if (typeof txt !== 'string' || txt.length > IMPORT_BYTES){ $('mMsg').textContent = T('Fail terlalu besar untuk diimport.'); return; }
   try { d = JSON.parse(txt); } catch(e) { $('mMsg').textContent = T('Teks bukan data sandaran yang sah.'); return; }
   if (!d || d.app !== 'kampung-atuk' || !Array.isArray(d.sesi)){ $('mMsg').textContent = T('Fail ini bukan sandaran Kampung Atuk.'); return; }
   const cur = allRecs(), key = r => [r.nama||'', r.ts||'', r.mod||'', r.d||''].join('|'), have = new Set(cur.map(key));
-  const add = d.sesi.filter(r=>r && typeof r === 'object' && typeof r.mod === 'string' && !have.has(key(r)));
-  const all = cur.concat(add).sort((a,b)=>(+b.ts||0)-(+a.ts||0));
+  const add = d.sesi.slice(0, IMPORT_MAX).map(cleanRec).filter(r=>r && !have.has(key(r)));
+  const all = cur.concat(add).sort((a,b)=>(+b.ts||0)-(+a.ts||0)).slice(0, IMPORT_MAX);
   store.set('ka.sesi', JSON.stringify(all));
   const cons = consents(); let nc = 0;
-  if (d.persetujuan && typeof d.persetujuan === 'object') for (const [n,c] of Object.entries(d.persetujuan)){ if (c && typeof c === 'object' && (!cons[n] || (+c.ts||0) > (+cons[n].ts||0))){ cons[n] = c; nc++; } }
+  if (d.persetujuan && typeof d.persetujuan === 'object') for (const [n0,c0] of Object.entries(d.persetujuan)){
+    const n = cleanStr(n0, 40), c = cleanConsent(c0);
+    if (!n || BAD_KEYS.has(n) || !c) continue;
+    const own = Object.prototype.hasOwnProperty.call(cons, n) ? cons[n] : null;
+    if (!own || c.ts > (+own.ts||0)){ cons[n] = c; nc++; }
+  }
   store.set('ka.consent', JSON.stringify(cons));
   let nn = 0;
-  if (d.nota && typeof d.nota === 'object') for (const [n,t] of Object.entries(d.nota)){ if (typeof t === 'string' && !store.get('ka.nota.'+n,'')){ store.set('ka.nota.'+n, t); nn++; } }
+  if (d.nota && typeof d.nota === 'object') for (const [n0,t] of Object.entries(d.nota)){ const n = cleanStr(n0, 40); if (n && !BAD_KEYS.has(n) && typeof t === 'string' && !store.get('ka.nota.'+n,'')){ store.set('ka.nota.'+n, t.slice(0, 4000)); nn++; } }
   updConsentStatus(); openMaster(); $('mSet').hidden = false;
   $('mMsg').textContent = T('Digabungkan: ') + add.length + T(' rekod baru, ') + nc + T(' persetujuan, ') + nn + T(' catatan. Rekod sedia ada tidak diubah.');
 }
 $('impFile').addEventListener('change', e=>{
   const f = e.target.files && e.target.files[0]; if (!f) return;
+  if (f.size > IMPORT_BYTES){ $('mMsg').textContent = T('Fail terlalu besar untuk diimport.'); e.target.value = ''; return; }
   const r = new FileReader(); r.onload = ()=>mergeData(String(r.result)); r.readAsText(f); e.target.value = '';
 });
 $('impPaste').addEventListener('click', ()=>{ const box = $('dataBox'); box.readOnly = false; box.value = ''; box.hidden = false; $('impGo').hidden = false; box.focus(); $('mMsg').textContent = T('Tampal teks sandaran, kemudian tekan Gabungkan.'); });

@@ -85,6 +85,10 @@ Semua teks yang dilihat pengguna ditulis dalam Bahasa Melayu dan dibalut dengan 
 - Rekod hanya disimpan selepas ibu bapa atau penjaga memberi persetujuan nyata. Lihat [PRIVASI.md](PRIVASI.md).
 - PIN Mod Induk disimpan sebagai cincangan SHA-256. Ia menghalang kanak-kanak daripada membuka analisis, tetapi bukan perlindungan keselamatan sebenar terhadap orang yang mahir teknikal.
 - Setiap rekod membawa nombor versi permainan (`v`).
+- PIN dikunci 30 saat selepas 5 cubaan salah (berganda setiap kali, maksimum 1 jam).
+- Fail import diperiksa: saiz maksimum 5 MB, maksimum 2000 rekod, medan tidak dikenali dibuang dan semua teks dipaparkan sebagai teks biasa.
+- Nama kanak-kanak tidak dibacakan oleh suara, kerana sesetengah suara pelayar diproses di awan.
+- Semakan keselamatan 0.10.1: tiada `eval`, tiada skrip luar, Three.js r128 tidak terjejas oleh CVE yang diketahui untuk ciri yang digunakan.
 
 ## Batasan diketahui
 

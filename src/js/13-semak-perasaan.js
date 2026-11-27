@@ -28,7 +28,7 @@ $('faces').addEventListener('click', e=>{
   day.keluar = f.id;
   saveRec({mod:'perasaan', masuk:day.masuk, keluar:day.keluar});
   const nm = $('nama').value.trim();
-  speak(T('Terima kasih. Jumpa lagi') + (nm ? ', ' + nm : '') + '!');
+  speak(T('Terima kasih. Jumpa lagi') + '!');
   state = 'day'; level = LEVELS[0]; lastErrs = 9;
   showEnd({title:T('Jumpa lagi') + (nm ? ', ' + nm : '') + '!', para:T('Ringkasan hari ini di kampung Atuk.'),
     stats:[[feelName(day.masuk),T('Perasaan masuk')],[feelName(day.keluar),T('Perasaan keluar')],[day.misi.filter(m=>m.done).length + ' / 3',T('Misi selesai')],[day.acts.length,T('Aktiviti dimainkan')],[kebunSesi + ' / ' + KEBUN.length,T('Kampung membesar')]].concat(day.hadiahNama ? [[day.hadiahNama,T('Hadiah hari ini')]] : []),

@@ -1,5 +1,13 @@
 # Log perubahan / Changelog
 
+## 0.10.1 (November 2026) — semakan keselamatan
+
+- Fail import disahkan: had saiz dan bilangan rekod, medan dan nilai tidak sah dibuang, kunci `__proto__` ditolak.
+- Persetujuan bertarikh masa depan atau rosak diabaikan.
+- PIN Mod Induk dikunci sementara selepas 5 cubaan salah.
+- Nama kanak-kanak tidak lagi dibacakan oleh suara.
+- PRIVASI.md: nota tentang suara awan, peranti dikongsi dan fail eksport.
+
 ## 0.10.0 (November 2026)
 
 - Misi harian (tiga aktiviti setiap hari) dan kampung yang membesar: 10 hadiah 3D.

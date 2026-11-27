@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<!--@CSP-->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Kampung Atuk</title>
+<!--@FONTS-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<!--/@FONTS-->
+<style>
+/*@CSS@*/
+</style>
+</head>
+<body>
+<header class="band">
+  <h1>Kampung Atuk</h1>
+  <p>Sehari di kampung: kutip buah, siram bunga, bantu ibu ayam.</p>
+</header>
+
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Kampung 3D"></canvas>
+  <div class="hud">
+    <div class="tag" id="tag"><span class="dot" id="dot"></span><div><b id="goal">Kampung Atuk</b><small id="prog"></small></div></div>
+    <div class="right">
+      <button class="btn-s" id="say" type="button">Dengar</button>
+      <button class="btn-s" id="stop" type="button">Balik rumah</button>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <div class="over" id="start">
+    <div class="card wide">
+      <div class="lang" role="group" aria-label="Bahasa / Language"><button class="lg" id="langMs" type="button">BM</button><button class="lg" id="langEn" type="button">EN</button></div>
+      <h2>Kampung Atuk</h2>
+      <p>Atuk perlukan bantuan hari ini. Pilih kawan dan jom ke kampung!</p>
+      <label class="nm">Nama <input id="nama" maxlength="24" placeholder="contoh: Danish" autocomplete="off"></label>
+      <p class="cst" id="cst"></p>
+      <p class="lbl">Pilih kawan</p>
+      <div class="chars" id="chars"></div>
+      <div class="nm"><label for="suara">Suara</label><select id="suara"></select><button class="btn-s" id="cuba" type="button">Cuba</button></div>
+      <div class="nm"><span>Bunyi kampung</span><button class="btn-s" id="ambBtn" type="button">Hidup</button><span>Mesra buta warna</span><button class="btn-s" id="cbBtn" type="button">Mati</button></div>
+      <button class="btn" id="go" type="button">Mula</button>
+      <button class="btn alt" id="masterBtn" type="button">Mod Induk (ibu bapa / OT)</button>
+    </div>
+  </div>
+
+  <div class="over" id="consent" hidden>
+    <div class="card wide">
+      <h2>Persetujuan ibu bapa</h2>
+      <p id="cnFor">Sebelum rekod disimpan, ibu bapa atau penjaga perlu membaca notis ini dan memberi persetujuan.</p>
+      <div class="notice" tabindex="0" aria-label="Notis privasi">
+        <h3>Apa yang direkod / What we record</h3>
+        <p>Nama panggilan kanak-kanak, watak dipilih, keputusan permainan (masa, ketepatan, kesilapan, tahap) dan perasaan yang dipilih di awal dan akhir sesi. Tiada nombor kad pengenalan, alamat, gambar atau rakaman suara.</p>
+        <p class="en">We record the child's nickname, chosen character, game results (time, accuracy, errors, level) and the feelings chosen at the start and end of a session. No IC number, address, photo or voice recording.</p>
+        <h3>Kenapa / Why</h3>
+        <p>Untuk ibu bapa dan jurupulih carakerja (OT) memantau kemajuan kemahiran kanak-kanak. Data perasaan dan prestasi ini dianggap data peribadi sensitif berkaitan kanak-kanak.</p>
+        <p class="en">So that parents and the occupational therapist can monitor the child's skill progress. This performance and feelings data is treated as sensitive personal data about a child.</p>
+        <h3>Di mana dan siapa boleh lihat / Where it is kept and who can see it</h3>
+        <p>Dalam versi prototaip ini, data disimpan dalam pelayar peranti ini sahaja dan tidak dihantar ke mana-mana pelayan. Analisis hanya boleh dibuka dalam Mod Induk yang dikunci dengan PIN.</p>
+        <p class="en">In this prototype, data stays in this device's browser only and is not sent to any server. The analysis opens only in the PIN-locked Parent Mode.</p>
+        <h3>Hak anda / Your rights</h3>
+        <ul><li>Persetujuan adalah sukarela. Tanpa persetujuan, kanak-kanak masih boleh bermain tanpa rekod disimpan.</li><li>Anda boleh menarik balik persetujuan dan memadam semua rekod bila-bila masa melalui Mod Induk, Tetapan.</li><li>Persetujuan diminta semula selepas 12 bulan atau bila notis ini dikemas kini.</li></ul>
+        <p class="en">Consent is voluntary. You may withdraw consent and delete all records at any time in Parent Mode, Settings. Consent is asked again after 12 months or when this notice changes.</p>
+        <p>Versi notis / Notice version 1.0</p>
+      </div>
+      <label class="nm" for="cnName">Nama penjaga <input id="cnName" maxlength="40" autocomplete="off" placeholder="contoh: Puan Aminah"></label>
+      <div class="nm"><label for="cnRel">Hubungan</label><select id="cnRel"><option value="Ibu">Ibu</option><option value="Bapa">Bapa</option><option value="Penjaga sah">Penjaga sah</option></select></div>
+      <label class="chk"><input type="checkbox" id="cnChk"><span>Saya ibu bapa atau penjaga sah kanak-kanak ini. Saya telah membaca notis di atas dan secara nyata bersetuju data permainannya direkod untuk tujuan tersebut.</span></label>
+      <button class="btn" id="cnYes" type="button" disabled>Setuju dan mula</button>
+      <button class="btn alt" id="cnNo" type="button">Main tanpa simpan rekod</button>
+    </div>
+  </div>
+
+  <div class="over" id="pin" hidden>
+    <div class="card">
+      <h2 id="pinT">Mod Induk</h2>
+      <p id="pinP"></p>
+      <form id="pinForm">
+        <div class="nm pinrow"><label for="pinIn">PIN</label><input id="pinIn" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>
+        <div class="nm pinrow" id="pin2Row"><label for="pin2">Ulang</label><input id="pin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>
+        <div class="msg" id="pinMsg"></div>
+        <button class="btn" type="submit">Buka</button>
+      </form>
+      <button class="btn alt" id="pinCancel" type="button">Batal</button>
+      <button class="btn alt" id="pinReset" type="button">Lupa PIN?</button>
+    </div>
+  </div>
+
+  <div class="over" id="master" hidden>
+    <div class="card big ms">
+      <div class="mhead"><h2>Analisis murid</h2><select id="mSel" aria-label="Pilih murid"></select></div>
+      <p id="mSum"></p>
+      <div class="doms" id="mDom"></div>
+      <h3 class="mh">Cadangan aktiviti di rumah dan sekolah</h3>
+      <ul class="tips" id="mTips"></ul>
+      <h3 class="mh">Catatan OT / ibu bapa</h3>
+      <textarea id="mNote" rows="3" placeholder="Pemerhatian klinikal, matlamat, maklum balas ibu bapa"></textarea>
+      <p class="disc">Analisis ini dijana daripada data permainan dan bukan ujian piawai. Ia membantu pemerhatian dan pemantauan kemajuan; keputusan klinikal dibuat oleh jurupulih carakerja bertauliah bersama penilaian formal.</p>
+      <div class="mbtns"><button class="btn" id="mCopy" type="button">Salin laporan</button><button class="btn alt" id="mSetBtn" type="button">Tetapan</button><button class="btn alt" id="mClose" type="button">Tutup dan kunci</button></div>
+      <div class="msg" id="mMsg"></div>
+      <textarea id="mOut" rows="8" readonly hidden aria-label="Teks laporan"></textarea>
+      <div class="mset" id="mSet" hidden>
+        <div class="nm"><span>Bunyi kampung</span><button class="btn-s" id="ambBtn2" type="button">Hidup</button></div>
+        <div class="nm"><label for="ambVol">Kekuatan</label><input type="range" id="ambVol" min="0" max="1" step="0.05"></div>
+        <div class="nm"><button class="btn-s" id="pinChange" type="button">Tukar PIN</button><button class="btn-s" id="mDel" type="button">Tarik balik persetujuan dan padam rekod</button></div>
+        <p class="lbl">Sandaran data (semua murid dalam peranti ini)</p>
+        <div class="nm"><button class="btn-s" id="expBtn" type="button">Eksport data</button><label class="btn-s filebtn" for="impFile">Import fail</label><input type="file" id="impFile" accept=".json,application/json" hidden><button class="btn-s" id="impPaste" type="button">Import dari teks</button></div>
+        <textarea id="dataBox" rows="5" hidden aria-label="Data sandaran JSON"></textarea>
+        <button class="btn-s" id="impGo" type="button" hidden>Gabungkan data ini</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="over" id="feel" hidden>
+    <div class="card wide">
+      <h2 id="feelT">Apa perasaan kamu hari ini?</h2>
+      <p>Pilih satu muka.</p>
+      <div class="faces" id="faces"></div>
+    </div>
+  </div>
+
+  <div class="over" id="stc" hidden>
+    <div class="card wide">
+      <h2 id="stT">Stesen</h2>
+      <p id="stP"></p>
+      <div id="stModes"><p class="lbl">Permainan</p><div class="lvs modes" id="modes"></div></div>
+      <p class="lbl">Tahap</p>
+      <div class="lvs" id="lvs"></div>
+      <button class="btn" id="stGo" type="button">Mula</button>
+      <button class="btn alt" id="stNo" type="button">Nanti dulu</button>
+    </div>
+  </div>
+
+  <div class="over" id="siram" hidden>
+    <div class="card wide">
+      <h2>Siram bunga Nenek</h2>
+      <div class="pots" id="siPots"></div>
+      <svg class="si" viewBox="0 0 320 280" aria-label="Pasu bunga">
+        <defs><clipPath id="potClip"><path d="M98 126 L222 126 L208 254 L112 254 Z"/></clipPath></defs>
+        <g id="can">
+          <path d="M30 30 Q60 -4 90 30" stroke="#1f6f64" stroke-width="8" fill="none"/>
+          <rect x="20" y="30" width="80" height="55" rx="12" fill="#2f9e8f"/>
+          <path d="M98 48 L148 26 L154 36 L102 64 Z" fill="#2f9e8f"/>
+          <circle cx="151" cy="31" r="7" fill="#1f6f64"/>
+        </g>
+        <rect id="stream" x="150" y="44" width="8" height="0" rx="4" fill="#5bb8f0" opacity=".9"/>
+        <rect x="84" y="110" width="152" height="16" rx="5" fill="#a4532c"/>
+        <path d="M90 124 L230 124 L214 262 L106 262 Z" fill="#c0663a"/>
+        <path d="M98 126 L222 126 L208 254 L112 254 Z" fill="#6b3a1f"/>
+        <g clip-path="url(#potClip)">
+          <rect id="band" x="90" width="140" fill="#7ee05a" opacity=".55"/>
+          <rect id="water" x="90" width="140" fill="#4aa8e8" opacity=".85"/>
+        </g>
+        <line id="bandTop" x1="94" x2="226" stroke="#2f7d3b" stroke-width="3" stroke-dasharray="6 5"/>
+        <line id="bandBot" x1="94" x2="226" stroke="#2f7d3b" stroke-width="3" stroke-dasharray="6 5"/>
+        <g class="fl" id="flower">
+          <path d="M160 112 L160 50" stroke="#3c9446" stroke-width="6"/>
+          <ellipse cx="146" cy="84" rx="14" ry="6" fill="#5bbf3a" transform="rotate(-30 146 84)"/>
+          <ellipse cx="174" cy="74" rx="14" ry="6" fill="#5bbf3a" transform="rotate(30 174 74)"/>
+          <g fill="#f06aa0"><circle cx="160" cy="28" r="13"/><circle cx="180" cy="40" r="13"/><circle cx="174" cy="62" r="13"/><circle cx="146" cy="62" r="13"/><circle cx="140" cy="40" r="13"/></g>
+          <circle cx="160" cy="46" r="11" fill="#ffc93c"/>
+        </g>
+      </svg>
+      <div class="msg" id="siMsg">Tekan dan tahan. Lepas bila air sampai jalur hijau.</div>
+      <button class="btn hold" id="siHold" type="button">Tahan untuk siram</button>
+      <button class="btn alt" id="siQuit" type="button">Berhenti</button>
+    </div>
+  </div>
+
+  <div class="over" id="jejak" hidden>
+    <div class="card big">
+      <h2>Bantu ibu ayam</h2>
+      <div class="msg" id="jjMsg">Letak jari di bulatan kuning, seret ikut tapak kaki ke sarang.</div>
+      <svg class="jj" id="jjSvg" viewBox="0 0 800 450" aria-label="Jejak tapak kaki ayam"></svg>
+      <button class="btn alt" id="jjQuit" type="button">Berhenti</button>
+    </div>
+  </div>
+
+  <div class="over" id="end" hidden>
+    <div class="card">
+      <h2 id="endT">Hebat!</h2>
+      <p id="endP"></p>
+      <div class="stats" id="stats"></div>
+      <ul class="hist" id="hist"></ul>
+      <button class="btn" id="again" type="button">Main lagi</button>
+      <button class="btn alt" id="menu" type="button">Balik ke kampung</button>
+    </div>
+  </div>
+</div>
+
+<section class="band">
+  <div class="notes">
+    <div><h3>Sehari di kampung</h3><p>Sesi bermula dengan semak perasaan, kemudian murid berjalan bebas ke tiga stesen bertanda kuning. Bila tekan "Balik rumah", murid pilih perasaan sekali lagi dan nampak ringkasan hari itu.</p></div>
+    <div><h3>Kutip buah</h3><p>Diskriminasi visual (cari warna) atau arahan berurutan 2 hingga 3 langkah dengan beban memori kerja yang meningkat. Direkod: salah urutan, salah warna, kali minta ulang.</p></div>
+    <div><h3>Siram bunga</h3><p>Kawalan motor bergred dan inhibisi: tekan dan tahan, lepas tepat di jalur hijau. Jalur makin sempit dan air makin laju di tahap tinggi. Direkod: pasu tepat, melimpah, bilangan tekanan.</p></div>
+    <div><h3>Bantu ibu ayam</h3><p>Integrasi visual-motor dan pra-menulis: seret jari ikut jejak dari lengkung mudah, bentuk S hingga zig-zag. Direkod: ketepatan dalam laluan dan kali terkeluar.</p></div>
+    <div><h3>Semak perasaan</h3><p>Lima muka (gembira, tenang, penat, risau, marah) di awal dan akhir sesi, untuk melatih murid mengenal emosi dan memberi terapis gambaran regulasi sebelum dan selepas aktiviti.</p></div>
+    <div><h3>Mod Induk</h3><p>Dikunci dengan PIN untuk ibu bapa dan OT. Analisis setiap murid mengikut enam domain: persepsi visual, memori kerja, kawalan motor bergred dan inhibisi, integrasi visual-motor, regulasi emosi serta penglibatan, berpandukan OTPF-4, konstruk Beery VMI, fungsi eksekutif dan konsep Zones of Regulation.</p></div>
+    <div><h3>Persetujuan PDPA</h3><p>Sebelum rekod murid disimpan, ibu bapa membaca notis privasi dwibahasa dan memberi persetujuan nyata sekali bagi setiap kanak-kanak. Persetujuan diminta semula selepas 12 bulan atau bila notis berubah, dan boleh ditarik balik dalam Mod Induk. Tanpa persetujuan, permainan berjalan tanpa menyimpan rekod.</p></div>
+    <div><h3>Mesra buta warna</h3><p>Mod pilihan yang menukar warna buah kepada palet Okabe-Ito dan menyebut nama buah dalam setiap arahan ("kutip rambutan merah"), supaya murid boleh bergantung pada bentuk buah, bukan warna sahaja.</p></div>
+    <div><h3>Sandaran data</h3><p>Dalam Mod Induk, Tetapan: eksport semua rekod, persetujuan dan catatan sebagai fail JSON, dan import semula ke peranti lain. Setiap rekod membawa nombor versi permainan.</p></div>
+    <div><h3>Bunyi kampung</h3><p>Angin, cengkerik, burung dan ayam dijana terus oleh kod. Boleh dimatikan atau diperlahankan untuk murid yang sensitif kepada bunyi.</p></div>
+    <div><h3>Kawan sekampung</h3><p>Tujuh watak berpakaian tradisional Malaysia: Baju Melayu bersamping songket, baju kurung bertudung, samfu, cheongsam, kurta, pavadai dan sinuangga Kadazan.</p></div>
+  </div>
+  <p class="fine">Prototaip awal. Kawalan: ketik atau seret di tanah, atau anak panah / WASD. Rekod setiap murid disimpan dalam pelayar ini sahaja. Butang Dengar membacakan arahan jika suara Bahasa Melayu ada pada peranti.</p>
+</section>
+
+<script>
+window.kampungAtuk = function(){
+/*@JS@*/
+};
+</script>
+<!--@LOADER-->
+<script>
+/* Three.js r128 loader: local copy first (vendor/), then three CDNs. r128 is pinned because later releases dropped the UMD build this game uses. */
+(function(){
+  var srcs = ['vendor/three.r128.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js', 'https://unpkg.com/three@0.128.0/build/three.min.js'];
+  var i = 0, started = false;
+  function go(){ if (started) return; started = true; window.kampungAtuk(); }
+  function fail(){
+    var st = document.getElementById('stage');
+    if (st){ var d = document.createElement('div'); d.className = 'over'; d.innerHTML = '<div class="card"><h2>Enjin 3D gagal dimuat</h2><p>Semak sambungan internet dan muat semula halaman. / The 3D engine could not load. Check the connection and reload.</p></div>'; st.appendChild(d); }
+  }
+  function next(){
+    if (window.THREE) return go();
+    if (i >= srcs.length) return fail();
+    var el = document.createElement('script'); el.src = srcs[i++];
+    el.onload = function(){ window.THREE ? go() : next(); };
+    el.onerror = next;
+    document.head.appendChild(el);
+  }
+  next();
+})();
+</script>
+<!--/@LOADER-->
+</body>
+</html>

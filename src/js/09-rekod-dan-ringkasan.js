@@ -8,9 +8,10 @@ function saveRec(rec){
   store.set('ka.sesi', JSON.stringify(all));
   return all.filter(h=>(h.nama||'') === rec.nama);
 }
-const LABEL = {warna:T('cari warna'), arahan:T('ikut arahan'), siram:T('siram bunga'), jejak:T('jejak ayam')};
+const LABEL = {warna:T('cari warna'), arahan:T('ikut arahan'), siram:T('siram bunga'), jejak:T('jejak ayam'), rama:T('tangkap rama-rama'), rehat:T('pondok rehat')};
 const feelName = id => (FEELS.find(f=>f.id===id)||{nama:'-'}).nama;
 function histRow(h){
+  if (h.mod === 'rehat') return [h.d + ' · ' + LABEL.rehat, h.s + ' s · ' + (h.kitaran||0) + T(' kitaran')];
   if (h.mod === 'perasaan') return [T('Perasaan ') + feelName(h.masuk) + ' → ' + feelName(h.keluar), h.d];
   return [h.d + ' · T' + h.tahap + ' ' + (LABEL[h.mod] || h.warna || ''), h.s + ' s · ' + h.acc + '%' + (h.salah ? ' · ' + h.salah + T(' salah') : '')];
 }
@@ -28,7 +29,11 @@ function stationDone(rec, title, para, stats){
   sfx.win();
   const nm = $('nama').value.trim();
   setTimeout(()=>speak(T('Syabas') + (nm ? ', ' + nm : '') + '!'), 700);
-  day.done.add(station.id); day.acts.push([station.nama + ' T' + level.n, rec.acc + '%']);
+  day.done.add(station.id); day.acts.push([station.nama + (rec.mod === 'rehat' ? '' : ' T' + (rec.tahap || level.n)), rec.mod === 'rehat' ? (rec.kitaran + T(' kitaran')) : rec.acc + '%']);
+  const mm = missionDone(station.id, rec);
+  if (mm){ setTimeout(()=>{ toast(mm); if (day.hadiah && mm.indexOf(day.hadiahNama || '§') >= 0) speak(mm); }, 1800); }
   const hist = saveRec(rec).slice(0,5);
+  if (rec.naik || rec.turun) para += ' ' + T('Tahap: ') + rec.tahapMula + ' → ' + rec.tahapAkhir + '.';
+  if (mm) para += ' ' + mm;
   showEnd({title: title + (nm ? ', ' + nm + '!' : '!'), para, stats, listTitle: recording ? T('Sesi lepas') + (nm ? ' · ' + nm : '') : T('Rekod tidak disimpan (tiada persetujuan)'), rows:hist.map(histRow)});
 }

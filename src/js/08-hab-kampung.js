@@ -2,7 +2,9 @@
 function renderHub(){
   $('dot').style.display = 'none';
   $('goal').textContent = 'Kampung Atuk';
-  $('prog').innerHTML = '<span class="steps">' + STATIONS.map(s=>'<span class="sp"><i style="background:'+(day.done.has(s.id)?'#5bbf3a':'#ffc93c')+'"></i>'+s.nama+'</span>').join('') + '</span>';
+  const ms = day.misi || [];
+  $('prog').innerHTML = '<span class="steps">' + (ms.length ? ms.map(m=>'<span class="sp'+(m.done?' ok':'')+'"><i style="background:'+(m.done?'#5bbf3a':'#ffc93c')+'"></i>'+(m.done ? '✓ ' : '')+m.nama+'</span>').join('') : STATIONS.map(s=>'<span class="sp"><i style="background:'+(day.done.has(s.id)?'#5bbf3a':'#ffc93c')+'"></i>'+s.nama+'</span>').join('')) + '</span>';
+  $('goal').textContent = ms.length ? T('Misi hari ini') + ' ' + ms.filter(m=>m.done).length + '/3' : 'Kampung Atuk';
   $('stop').textContent = T('Balik rumah');
 }
 function goHub(){
@@ -16,6 +18,9 @@ function openStation(st){
   level = LEVELS[lvMap[st.id]-1];
   $('stT').textContent = st.nama; $('stP').textContent = st.desc;
   $('stModes').hidden = st.id !== 'buah';
+  const rest = st.id === 'rehat';
+  $('lvs').hidden = rest; $('lvsLbl').hidden = rest;
+  $('adNote').textContent = rest ? T('Tempoh: ') + TEMPOH_NAMA[tempoh] + '.' : T('Tempoh: ') + TEMPOH_NAMA[tempoh] + (adaptif ? T('. Tahap menyesuaikan diri semasa bermain.') : '.');
   drawLevels(); $('stc').hidden = false; speak(st.cakap);
 }
 function drawLevels(){
@@ -30,4 +35,6 @@ function startStation(){
   if (station.id === 'buah') startRound();
   if (station.id === 'siram') startSiram();
   if (station.id === 'jejak') startJejak();
+  if (station.id === 'rama') startRama();
+  if (station.id === 'rehat') startRehat();
 }

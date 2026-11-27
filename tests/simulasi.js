@@ -47,7 +47,7 @@ const sandbox={NodeFilter:{SHOW_TEXT:4},location:{reload(){reloaded=true}},THREE
  AudioContext:class{constructor(){this.currentTime=0;this.destination={};this.sampleRate=8000}resume(){}createBuffer(c,n){return {getChannelData:()=>new Float32Array(n)}}createBufferSource(){return {connect:x=>x,start(){}}}createBiquadFilter(){return {frequency:{value:0},Q:{value:0},connect:x=>x}}createStereoPanner(){return {pan:{value:0},connect:x=>x}}createOscillator(){return {type:'',frequency:{value:0,setValueAtTime(){},exponentialRampToValueAtTime(){},linearRampToValueAtTime(){}},connect:x=>x,start(){},stop(){}}}createGain(){return {gain:{value:0,setTargetAtTime(){},setValueAtTime(){},linearRampToValueAtTime(){},exponentialRampToValueAtTime(){}},connect:x=>x}}},
  crypto:globalThis.crypto,TextEncoder,navigator:{clipboard:{writeText:async t=>{clip=t}}},console,Math,JSON,Array,Set,Object,String,Number,Date,Promise,Infinity};
 sandbox.window=sandbox;
-let clip='';let reloaded=false;if(process.env.LANGX)store['ka.lang']=process.env.LANGX;let raf=null, now=0, timers=[], spoken=[];
+let clip='';let reloaded=false;if(process.env.LANGX)store['ka.lang']=process.env.LANGX;store['ka.tempoh']='pendek';if(process.env.KEBUN9)store['ka.kebun.Ayu']='9';let raf=null, now=0, timers=[], spoken=[];
 // make 'closest' events
 function fire(id,ev,e={}){ (listeners[id+':'+ev]||[]).forEach(f=>f(e)); }
 function click(id,data){ const target={closest:()=>({dataset:data})}; fire(id,'click',{target}); }
@@ -131,6 +131,55 @@ log('saved after unnamed day', store['ka.sesi']||'(none)');
  fire('mClose','click'); log('closed', el('master').hidden, !el('start').hidden);
  fire('masterBtn','click'); el('pinIn').value='9999'; fire('pinForm','submit',{preventDefault(){}}); await new Promise(r=>setTimeout(r,50)); log('wrong pin', el('pinMsg').textContent, 'master hidden', el('master').hidden);
  fire('ambBtn','click'); log('amb', el('ambBtn').textContent, store['ka.amb']);
+ // ===================== 0.10.0: misi, adaptif, rama-rama, pondok rehat, kampung membesar =====================
+ log('\n=== 0.10.0 ===');
+ function seeded(str){ let h = 2166136261; for (const ch of str){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 10000) / 10000; }; }
+ const POOL=['buah-warna','buah-arahan','siram','jejak','rama'];
+ function misiFor(nm){ const r=seeded(nm+'|'+new Date().toISOString().slice(0,10)), pool=POOL.slice(), out=[]; while(out.length<3){ out.push(pool.splice(Math.floor(r()*pool.length),1)[0]); } return out; }
+ let kid=null; for (const n of ['Aina','Ali','Siti','Mei','Raju','Ayu','Bala','Chong','Dina','Eka','Farah','Gopal']){ const m=misiFor(n); if(!m.some(x=>x.startsWith('buah'))){ kid=n; break; } }
+ log('kid', kid, misiFor(kid));
+ el('nama').value=kid; fire('nama','input');
+ click('go'); el('cnName').value='Puan Ros'; fire('cnName','input'); el('cnChk').checked=true; fire('cnChk','change'); fire('cnYes','click');
+ click('faces',{f:'risau'}); log('hub goal', el('goal').textContent, '| prog', el('prog').innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' '), '| said', spoken.at(-1));
+ // pondok rehat
+ goTo(1.2,9); log('rehat card', el('stT').textContent, '| levels hidden', el('lvs').hidden, '| note', el('adNote').textContent); fire('stGo','click');
+ log('rehat shown', !el('rehat').hidden, el('rhCount').textContent); step(700);
+ log('rehat end', !el('end').hidden, el('endT').textContent, '|', el('stats').innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' '));
+ fire('menu','click');
+ async function doSiram(){ goTo(-6,5); fire('stGo','click'); const tot=+el('siMsg').textContent.match(/\/ (\d+)/)[1];
+   for(let p=0;p<tot;p++){ fire('siHold','pointerdown',{}); let g=0; while(g<600){ step(); g++; const wy=+el('water')._attrs.y, bt=+el('bandTop')._attrs.y1, bb=+el('bandBot')._attrs.y1; if(wy<(bt+bb)/2) break; } fire('siHold','pointerup',{}); step(40); }
+   return tot; }
+ async function doJejak(){ goTo(7,7); fire('stGo','click'); let n=0;
+   while(!el('jejak').hidden && n<12){ const d=(el('jjSvg').innerHTML.match(/class="cor" id="cor" d="([^"]+)"/)||[])[1]; const pts=d.slice(1).split(' L').map(q=>q.split(' ').map(Number));
+     fire('jjSvg','pointerdown',{clientX:pts[0][0],clientY:pts[0][1],pointerId:1}); for(let i=0;i<pts.length;i+=3) fire('jjSvg','pointermove',{clientX:pts[i][0],clientY:pts[i][1]}); fire('jjSvg','pointermove',{clientX:pts.at(-1)[0],clientY:pts.at(-1)[1]}); step(40); n++; }
+   return n; }
+ async function doRama(){ goTo(-7.4,-1.6); log('rama card', el('stT').textContent); fire('stGo','click'); let taps=0, miss=0;
+   let guard=0; while(!el('rama').hidden && taps<200 && guard++<4000){ step(3); const tr=el('rm0')._attrs.transform||''; const m=tr.match(/translate\(([-\d.]+) ([-\d.]+)\)/);
+     if(m && +m[1]>0){ if(taps%6===5){ fire('rmSvg','pointerdown',{clientX:5,clientY:5}); miss++; } fire('rmSvg','pointerdown',{clientX:+m[1],clientY:+m[2]}); taps++; } }
+   if(guard>=4000) log('RAMA GUARD', el('rmMsg').textContent, el('rm0')._attrs.transform, el('rm1')._attrs.transform, el('stc').hidden, el('rama').hidden);
+   step(30); return [taps, miss]; }
+ for (const m of misiFor(kid)){
+   if(m==='siram') log('siram pots', await doSiram(), '|', el('endT').textContent, '|', el('endP').textContent);
+   if(m==='jejak') log('jejak paths', await doJejak(), '|', el('endT').textContent, '|', el('endP').textContent);
+   if(m==='rama') log('rama taps', await doRama(), '|', el('endT').textContent, '|', el('stats').innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' '), '|', el('endP').textContent);
+   step(50); log(' toast', el('toast').textContent); fire('menu','click');
+ }
+ log('kebun stored', store['ka.kebun.'+kid], '| hub', el('goal').textContent);
+ fire('stop','click'); click('faces',{f:'tenang'}); log('day', el('stats').innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' '));
+ const recs=JSON.parse(store['ka.sesi']).filter(r=>r.nama===kid); log('recs', recs.map(r=>r.mod+':T'+r.tahapMula+'->'+r.tahap+'/'+r.tahapAkhir+(r.tempoh?'/'+r.tempoh:'')).join(' '));
+ fire('menu','click');
+ // Mod Induk shows new domain
+ fire('masterBtn','click'); el('pinIn').value='1234'; fire('pinForm','submit',{preventDefault(){}}); await new Promise(r=>setTimeout(r,50));
+ if(!el('master').hidden){ el('mSel').value=kid; fire('mSel','change',{target:{value:kid}}); }
+ const dom=el('mDom').innerHTML.replace(/<\/(article)>/g,'\n').replace(/<[^>]+>/g,' ').replace(/[ ]+/g,' ');
+ log('domains', (dom.match(/Penjejakan visual[^\n]*/)||dom.match(/Visual tracking[^\n]*/)||['(tiada)'])[0].slice(0,260));
+ log('rehat metric', /pondok rehat|rest hut/i.test(dom));
+ fire('mClose','click');
+ // panjang + adaptif off
+ click('lenSeg',{len:'panjang'}); fire('adBtn','click'); log('opts', store['ka.tempoh'], store['ka.adaptif']);
+ click('go'); click('faces',{f:'gembira'}); goTo(-6,5); fire('stGo','click'); log('panjang siram', el('siMsg').textContent);
+ fire('siQuit','click'); click('lenSeg',{len:'pendek'}); fire('adBtn','click');
+
  // export / import round trip
  fire('masterBtn','click'); el('pinIn').value='1234'; fire('pinForm','submit',{preventDefault(){}}); await new Promise(r=>setTimeout(r,50));
  fire('expBtn','click'); const dump = el('dataBox').value; const parsed = JSON.parse(dump); log('export recs', parsed.sesi.length, 'consents', Object.keys(parsed.persetujuan).length, 'v', parsed.v, 'rec v', parsed.sesi[0].v);

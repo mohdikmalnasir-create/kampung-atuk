@@ -41,6 +41,10 @@
       <div class="chars" id="chars"></div>
       <div class="nm"><label for="suara">Suara</label><select id="suara"></select><button class="btn-s" id="cuba" type="button">Cuba</button></div>
       <div class="nm"><span>Bunyi kampung</span><button class="btn-s" id="ambBtn" type="button">Hidup</button><span>Mesra buta warna</span><button class="btn-s" id="cbBtn" type="button">Mati</button></div>
+      <div class="nm opt"><span>Tempoh sesi</span><span class="seg" id="lenSeg"><button class="lg" type="button" data-len="pendek">Pendek</button><button class="lg" type="button" data-len="sederhana">Sederhana</button><button class="lg" type="button" data-len="panjang">Panjang</button></span></div>
+      <div class="nm opt"><span>Kesukaran adaptif</span><button class="btn-s" id="adBtn" type="button">Hidup</button></div>
+      <div class="nm opt"><span>Tempoh sesi</span><span class="seg" id="lenSeg"><button class="lg" type="button" data-len="pendek">Pendek</button><button class="lg" type="button" data-len="sederhana">Sederhana</button><button class="lg" type="button" data-len="panjang">Panjang</button></span></div>
+      <div class="nm opt"><span>Kesukaran adaptif</span><button class="btn-s" id="adBtn" type="button">Hidup</button></div>
       <button class="btn" id="go" type="button">Mula</button>
       <button class="btn alt" id="masterBtn" type="button">Mod Induk (ibu bapa / OT)</button>
     </div>
@@ -126,8 +130,9 @@
       <h2 id="stT">Stesen</h2>
       <p id="stP"></p>
       <div id="stModes"><p class="lbl">Permainan</p><div class="lvs modes" id="modes"></div></div>
-      <p class="lbl">Tahap</p>
+      <p class="lbl" id="lvsLbl">Tahap</p>
       <div class="lvs" id="lvs"></div>
+      <p class="adnote" id="adNote"></p>
       <button class="btn" id="stGo" type="button">Mula</button>
       <button class="btn alt" id="stNo" type="button">Nanti dulu</button>
     </div>
@@ -175,6 +180,54 @@
       <div class="msg" id="jjMsg">Letak jari di bulatan kuning, seret ikut tapak kaki ke sarang.</div>
       <svg class="jj" id="jjSvg" viewBox="0 0 800 450" aria-label="Jejak tapak kaki ayam"></svg>
       <button class="btn alt" id="jjQuit" type="button">Berhenti</button>
+    </div>
+  </div>
+
+  <div class="over" id="rama" hidden>
+    <div class="card big">
+      <h2>Tangkap rama-rama</h2>
+      <div class="msg" id="rmMsg">Ketik rama-rama untuk menangkapnya.</div>
+      <svg class="jj" id="rmSvg" viewBox="0 0 800 450" aria-label="Taman rama-rama"></svg>
+      <button class="btn alt" id="rmQuit" type="button">Berhenti</button>
+    </div>
+  </div>
+
+  <div class="over" id="rehat" hidden>
+    <div class="card wide">
+      <h2>Pondok rehat</h2>
+      <p id="rhCue" class="cue">Ikut belon.</p>
+      <svg class="si" viewBox="0 0 320 300" aria-label="Belon pernafasan">
+        <path d="M160 250 Q150 270 165 292" stroke="#8a5a2b" stroke-width="3" fill="none"/>
+        <circle id="blon" cx="160" cy="130" r="50" fill="#f3876a" opacity=".9"/>
+        <circle cx="140" cy="105" r="14" fill="#ffffff" opacity=".45"/>
+      </svg>
+      <p class="lbl rhc">Kitaran nafas <b id="rhCount">0</b></p>
+      <button class="btn" id="rhDone" type="button" hidden>Saya dah tenang</button>
+      <button class="btn alt" id="rhQuit" type="button">Berhenti</button>
+    </div>
+  </div>
+
+  <div class="over" id="rama" hidden>
+    <div class="card big">
+      <h2>Tangkap rama-rama</h2>
+      <div class="msg" id="rmMsg">Ketik rama-rama untuk menangkapnya.</div>
+      <svg class="jj" id="rmSvg" viewBox="0 0 800 450" aria-label="Taman rama-rama"></svg>
+      <button class="btn alt" id="rmQuit" type="button">Berhenti</button>
+    </div>
+  </div>
+
+  <div class="over" id="rehat" hidden>
+    <div class="card wide">
+      <h2>Pondok rehat</h2>
+      <p id="rhCue" class="cue">Ikut belon.</p>
+      <svg class="si" viewBox="0 0 320 300" aria-label="Belon pernafasan">
+        <path d="M160 250 Q150 270 165 292" stroke="#8a5a2b" stroke-width="3" fill="none"/>
+        <circle id="blon" cx="160" cy="130" r="50" fill="#f3876a" opacity=".9"/>
+        <circle cx="140" cy="105" r="14" fill="#ffffff" opacity=".45"/>
+      </svg>
+      <p class="lbl rhc">Kitaran nafas <b id="rhCount">0</b></p>
+      <button class="btn" id="rhDone" type="button" hidden>Saya dah tenang</button>
+      <button class="btn alt" id="rhQuit" type="button">Berhenti</button>
     </div>
   </div>
 

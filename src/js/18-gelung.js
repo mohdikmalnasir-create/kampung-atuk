@@ -36,6 +36,9 @@ function tick(){
   P.body.position.y = P.baseY + (moving ? 0 : Math.sin(t*2)*.015);
   marker.scale.setScalar(1 + Math.sin(t*6)*.12);
   ambTick();
+  extraAnims.forEach(f=>f(t, dt));
+  if (state === 'rama') ramaTick(t, dt);
+  if (state === 'rehat') rehatTick(dt);
   hens.forEach(h=>{ const s = Math.sin(t*3+h.ph); h.head.position.y = .72 - Math.max(0, s)*.2; h.head.rotation.x = Math.max(0, s)*.8; });
   STATIONS.forEach(st=>{ st.ring.scale.setScalar(1 + Math.sin(t*3)*.06); st.label.position.y = 3.1 + Math.sin(t*2)*.08; });
 
@@ -63,8 +66,9 @@ function tick(){
     const d = Math.hypot(player.position.x-f.g.position.x, player.position.z-f.g.position.z);
     if (d < .95 && !f.cool){
       if (mode === 'arahan'){ if (!between) pickArahan(f); }
-      else if (f.key === goalKey){ f.pop = .001; got++; sfx.ok(); updProg(); if (got >= level.target) finishBuah(); }
-      else { f.cool = true; f.shake = .5; wrong++; sfx.no(); toast(T('Itu ') + L(f.key) + T('. Cari ') + L(goalKey) + '!'); }
+      else if (between) {}
+      else if (f.key === goalKey){ f.pop = .001; got++; roundGot++; sfx.ok(); updProg(); if (roundGot >= level.target) warnaRoundDone(); }
+      else { f.cool = true; f.shake = .5; wrong++; roundWrong++; sfx.no(); toast(T('Itu ') + L(f.key) + T('. Cari ') + L(goalKey) + '!'); }
     } else if (d > 1.6) f.cool = false;
   }
 

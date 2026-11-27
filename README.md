@@ -1,12 +1,12 @@
 # Kampung Atuk
 
-Permainan web 3D untuk sesi terapi carakerja (OT) kanak-kanak 4 hingga 7 tahun. Murid menghabiskan "sehari di kampung Atuk": semak perasaan, kutip buah, siram bunga dan bantu ibu ayam. Ibu bapa dan OT melihat analisis kemajuan dalam Mod Induk yang dikunci dengan PIN.
+Permainan web 3D untuk sesi terapi carakerja (OT) kanak-kanak 4 hingga 7 tahun. Murid menghabiskan "sehari di kampung Atuk": semak perasaan, tiga misi harian, lima stesen aktiviti, dan kampung yang membesar setiap kali misi selesai. Ibu bapa dan OT melihat analisis kemajuan dalam Mod Induk yang dikunci dengan PIN.
 
 *A 3D web game for paediatric occupational therapy (ages 4 to 7), in Bahasa Melayu and English. See [English summary](#english-summary).*
 
 Main di sini / Play here: https://mohdikmalnasir-create.github.io/kampung-atuk/
 
-> **Status: prototaip 0.9.0 untuk semakan pakar.** Bukan alat diagnosis. Analisis ialah pemerhatian daripada data permainan; keputusan klinikal dibuat oleh jurupulih carakerja bertauliah bersama penilaian formal.
+> **Status: prototaip 0.10.0 untuk semakan pakar.** Bukan alat diagnosis. Analisis ialah pemerhatian daripada data permainan; keputusan klinikal dibuat oleh jurupulih carakerja bertauliah bersama penilaian formal.
 
 ## Ciri utama
 
@@ -16,16 +16,22 @@ Main di sini / Play here: https://mohdikmalnasir-create.github.io/kampung-atuk/
 | Kutip buah: ikut arahan (2 hingga 3 langkah) | Memori kerja, arahan berurutan | Fungsi eksekutif, OTPF-4 *Heeds, Sequences* |
 | Siram bunga (tekan, tahan, lepas) | Kawalan motor bergred, inhibisi | OTPF-4 *Calibrates, Terminates* |
 | Bantu ibu ayam (seret ikut jejak) | Integrasi visual-motor, pra-menulis | Konstruk Beery VMI |
+| Tangkap rama-rama (ketik sasaran bergerak; lebah di tahap 3) | Penjejakan visual, koordinasi mata-tangan, inhibisi | OTPF-4 *Reaches, Coordinates* |
+| Pondok rehat (pernafasan belon) | Regulasi diri | Strategi bertenang, dicadangkan bila murid rasa risau atau marah |
 | Semak perasaan masuk dan keluar | Regulasi emosi | Selari dengan konsep Zones of Regulation |
 
 Turut disertakan:
+
+- **Misi harian:** tiga aktiviti dipilih ikut nama murid dan tarikh. Bila ketiga-tiga selesai, Atuk memberi hadiah dan kampung bertambah satu item (10 item: pokok pisang hingga pokok rambutan besar).
+- **Tempoh sesi** pendek, sederhana atau panjang (contohnya 5, 8 atau 12 pasu), dipilih di skrin mula.
+- **Kesukaran adaptif:** dua kejayaan berturut-turut menaikkan tahap, dua kesukaran berturut-turut menurunkannya. Rekod menyimpan tahap mula, tertinggi dan akhir.
 
 - Tujuh watak berbilang kaum berpakaian tradisional Malaysia.
 - Dwibahasa BM / EN, dengan arahan suara mengikut suara yang ada pada peranti.
 - Mod mesra buta warna (palet Okabe-Ito dan nama buah dalam arahan).
 - Bunyi suasana kampung yang dijana kod, boleh dimatikan.
 - Persetujuan ibu bapa PDPA, mod tanpa rekod, tarik balik dan padam.
-- Mod Induk: analisis enam domain, cadangan aktiviti, catatan OT, salin laporan, eksport dan import sandaran.
+- Mod Induk: analisis tujuh domain, cadangan aktiviti, catatan OT, salin laporan, eksport dan import sandaran.
 
 ## Cara menjalankan
 
@@ -100,4 +106,4 @@ Kod permainan: hak cipta terpelihara, lihat [LICENSE](LICENSE). Three.js: MIT (`
 
 Kampung Atuk is a 3D web game for paediatric occupational therapy. Children spend a day in Atuk's kampung: a feelings check-in, picking fruit by colour or by multi-step instructions, watering flowers (graded hold-and-release), and tracing a hen's footprints (visual-motor integration). A PIN-locked Parent Mode analyses each child across six domains guided by OTPF-4, Beery VMI constructs, executive function and the Zones of Regulation concept.
 
-The whole game is one self-contained `index.html` (fonts and Three.js embedded, strict CSP, no outbound connections), served by GitHub Pages. Rebuild with `node scripts/build.mjs` and test with `node tests/simulasi.js`. The interface switches between Bahasa Melayu and English. This is a prototype for expert review, not a diagnostic tool. All rights reserved.
+The whole game is one self-contained `index.html` (fonts and Three.js embedded, strict CSP, no outbound connections), served by GitHub Pages. Rebuild with `node scripts/build.mjs` and test with `node tests/simulasi.js`. Version 0.10.0 adds daily missions with a growing kampung, selectable session length, adaptive difficulty, a butterfly-catching station (visual tracking, eye-hand coordination, inhibition) and a breathing rest hut. The interface switches between Bahasa Melayu and English. This is a prototype for expert review, not a diagnostic tool. All rights reserved.

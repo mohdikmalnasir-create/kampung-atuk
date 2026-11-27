@@ -19,13 +19,18 @@ function askFeeling(m){
 $('faces').addEventListener('click', e=>{
   const b = e.target.closest('.face'); if (!b) return;
   const f = FEELS.find(x=>x.id === b.dataset.f); sfx.ding();
-  if (feelMode === 'masuk'){ day.masuk = f.id; speak(T('Terima kasih. Jom ke kampung Atuk!')); goHub(); return; }
+  if (feelMode === 'masuk'){
+    day.masuk = f.id; goHub();
+    if (f.id === 'risau' || f.id === 'marah'){ speak(T('Terima kasih kerana memberitahu. Jom singgah di Pondok rehat dulu.')); toast(T('Cuba Pondok rehat dulu, kemudian misi hari ini.')); }
+    else speak(T('Terima kasih. Misi hari ini: ') + day.misi.map(m=>m.nama).join(', ') + '.');
+    return;
+  }
   day.keluar = f.id;
   saveRec({mod:'perasaan', masuk:day.masuk, keluar:day.keluar});
   const nm = $('nama').value.trim();
   speak(T('Terima kasih. Jumpa lagi') + (nm ? ', ' + nm : '') + '!');
   state = 'day'; level = LEVELS[0]; lastErrs = 9;
   showEnd({title:T('Jumpa lagi') + (nm ? ', ' + nm : '') + '!', para:T('Ringkasan hari ini di kampung Atuk.'),
-    stats:[[feelName(day.masuk),T('Perasaan masuk')],[feelName(day.keluar),T('Perasaan keluar')],[day.done.size + ' / ' + STATIONS.length,T('Stesen disiapkan')],[day.acts.length,T('Aktiviti dimainkan')]],
+    stats:[[feelName(day.masuk),T('Perasaan masuk')],[feelName(day.keluar),T('Perasaan keluar')],[day.misi.filter(m=>m.done).length + ' / 3',T('Misi selesai')],[day.acts.length,T('Aktiviti dimainkan')],[kebunSesi + ' / ' + KEBUN.length,T('Kampung membesar')]].concat(day.hadiahNama ? [[day.hadiahNama,T('Hadiah hari ini')]] : []),
     listTitle:T('Aktiviti hari ini'), rows:day.acts.length ? day.acts : [[T('Tiada aktiviti'),'']], again:false, menuLabel:T('Selesai'), kind:'day'});
 });

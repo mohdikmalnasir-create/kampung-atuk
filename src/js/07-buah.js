@@ -28,5 +28,5 @@ function addFruit(key){
 
 let toastT;
 function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('on'), 1700); }
-function hideOverlays(){ ['start','feel','stc','siram','jejak','end','pin','master','consent'].forEach(id=>$(id).hidden = true); }
+function hideOverlays(){ ['start','feel','stc','siram','jejak','rama','rehat','end','pin','master','consent'].forEach(id=>$(id).hidden = true); }
 function showStationsInWorld(on){ STATIONS.forEach(st=>{ st.ring.visible = on; st.label.visible = on; }); }

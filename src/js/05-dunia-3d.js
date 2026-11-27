@@ -91,7 +91,9 @@ function labelCanvas(text, done){
   x.fillStyle = done ? '#dff1d6' : '#fffdf6';
   x.beginPath(); x.moveTo(40,8); x.arcTo(504,8,504,120,32); x.arcTo(504,120,8,120,32); x.arcTo(8,120,8,8,32); x.arcTo(8,8,504,8,32); x.fill();
   x.font = '800 60px "Baloo 2", sans-serif'; x.fillStyle = '#173a1f'; x.textAlign = 'center'; x.textBaseline = 'middle';
-  x.fillText(text + (done ? ' ✓' : ''), 256, 70);
+  const lbl = text + (done ? ' ✓' : ''); let fs = 60; x.font = '800 ' + fs + 'px "Baloo 2", sans-serif';
+  while (fs > 34 && ((x.measureText && x.measureText(lbl)) || {width:0}).width > 470){ fs -= 2; x.font = '800 ' + fs + 'px "Baloo 2", sans-serif'; }
+  x.fillText(lbl, 256, 70);
   return c;
 }
 STATIONS.forEach(st=>{

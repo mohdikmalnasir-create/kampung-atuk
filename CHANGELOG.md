@@ -1,5 +1,15 @@
 # Log perubahan / Changelog
 
+## 0.10.0 (November 2026)
+
+- Misi harian (tiga aktiviti setiap hari) dan kampung yang membesar: 10 hadiah 3D.
+- Tempoh sesi pendek, sederhana atau panjang.
+- Kesukaran adaptif dalam setiap stesen; rekod menyimpan tahap mula, tertinggi dan akhir.
+- Stesen baharu: Tangkap rama-rama (lebah di tahap 3 untuk inhibisi) dan Pondok rehat (pernafasan belon).
+- Pondok rehat dicadangkan bila semak masuk ialah risau atau marah.
+- Mod Induk: domain ketujuh "Penjejakan visual dan koordinasi mata-tangan", dan bilangan guna pondok rehat dalam regulasi emosi.
+- Pembetulan: tetingkap stesen ditutup dengan betul bila ringkasan dipaparkan.
+
 ## 0.9.0 (November 2026)
 
 - Dwibahasa BM / EN dengan suara mengikut bahasa.

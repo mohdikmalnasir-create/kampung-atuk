@@ -107,6 +107,19 @@ function analyse(name){
     d.tips = [T('Lukis bentuk dengan jari di dulang pasir atau garam.'),T('Ikut garisan tebal dengan krayon, kemudian labirin mudah dan sambung titik.'),T('Uli dan gulung plastisin untuk menguatkan tangan.')];
     out.push(d); }
 
+  { const rs = by('rama'), d = domain('eh',T('Penjejakan visual dan koordinasi mata-tangan'),T('OTPF-4 kemahiran motor (Reaches, Coordinates) · koordinasi mata-tangan · kawalan inhibisi (lebah)'), rs), r3 = rs.slice(-3);
+    if (rs.length){
+      const rt = avg(r3.map(r=>+r.rt||0))/1000, luput = avg(r3.map(r=>+r.luput||0)), lebah = avg(r3.map(r=>+r.lebah||0));
+      d.metrics = [[d.acc+'%',T('Ketepatan ketikan, 3 sesi terakhir')],[T('Tahap ')+d.maxT,T('Tahap tertinggi')],[rt.toFixed(1)+' s',T('Purata masa menangkap')],[luput.toFixed(1),T('Purata ketikan tersasar')]];
+      if (d.maxT >= 3) d.metrics.push([lebah.toFixed(1),T('Purata tersentuh lebah')]);
+      if (rt > 3) d.notes.push(T('Masa menangkap agak perlahan. Perhatikan penjejakan mata (mata mengikut objek bergerak) dan kelajuan memulakan gerakan tangan.'));
+      if (luput >= 5) d.notes.push(T('Banyak ketikan tersasar: mungkin sukar menganggar kedudukan sasaran bergerak. Cuba tahap lebih perlahan dengan sasaran lebih besar.'));
+      if (lebah >= 1.5) d.notes.push(T('Kerap menyentuh lebah: tindak balas impulsif terhadap objek bergerak. Gabungkan dengan latihan mula-berhenti.'));
+      const tn = trendNote(rs, ''); if (tn) d.notes.push(tn);
+    }
+    d.tips = [T('Tiup dan tangkap buih sabun.'),T('Baling dan sambut bola lembut atau belon.'),T('Ikut cahaya lampu suluh yang bergerak di dinding dengan jari.')];
+    out.push(d); }
+
   { const rs = by('perasaan'), d = domain('reg',T('Regulasi emosi'),T('Selari dengan konsep The Zones of Regulation (semak masuk dan keluar)'), rs);
     d.st = rs.length < 2 ? 'data' : 'pantau'; d.series = rs.slice(-10).map(r=>(VAL[r.masuk] ?? 1)*50);
     if (rs.length){
@@ -118,21 +131,23 @@ function analyse(name){
       if (rs.length >= 2 && neg/rs.length >= .5){ d.st = 'perlu'; d.notes.push(T('Separuh atau lebih sesi bermula dengan perasaan risau atau marah (Zon Kuning atau Merah). Bincang pencetus dengan ibu bapa dan rancang strategi menenangkan sebelum aktiviti.')); }
       if (rs.length >= 2 && tired/rs.length >= .5) d.notes.push(T('Kerap penat (Zon Biru) di awal sesi: semak tidur, waktu sesi dan tahap kewaspadaan.'));
       if (rs.length >= 2 && better/rs.length >= .5) d.notes.push(T('Perasaan selalunya bertambah baik selepas bermain: aktiviti ini mungkin membantu murid beralih ke Zon Hijau.'));
+      const rehat = recs.filter(r=>r.mod === 'rehat').length; d.metrics.push([rehat, T('Kali guna pondok rehat')]);
+      if (rehat >= 3) d.notes.push(T('Kerap menggunakan pondok rehat: murid sedang mengamalkan strategi bertenang.'));
       const last = rs[rs.length-1]; d.notes.push(T('Sesi terakhir: ') + feelName(last.masuk) + ' (' + (ZON[last.masuk]||'-') + T(') kepada ') + feelName(last.keluar) + ' (' + (ZON[last.keluar]||'-') + ').');
     }
     d.tips = [T('Semak perasaan setiap pagi dengan kad muka atau warna.'),T('Latihan tiup belon: tarik nafas 4 kiraan, hembus perlahan.'),T('Sediakan sudut tenang dengan bantal dan barang sensori.')];
     out.push(d); }
 
-  { const rs = recs.filter(r=>r.mod !== 'perasaan'), d = domain('eng',T('Penglibatan dan ketahanan tugasan'),T('OTPF-4 kemahiran proses (Paces, Attends) · penglibatan dalam aktiviti'), rs);
+  { const rs = recs.filter(r=>r.mod !== 'perasaan' && r.mod !== 'rehat'), d = domain('eng',T('Penglibatan dan ketahanan tugasan'),T('OTPF-4 kemahiran proses (Paces, Attends) · penglibatan dalam aktiviti'), rs);
     d.st = rs.length < 3 ? 'data' : 'pantau'; d.series = [];
     if (rs.length){
       const days = new Set(rs.map(r=>r.d)).size, mins = avg(rs.map(r=>+r.s||0))/60, cnt = {};
       rs.forEach(r=>cnt[r.mod] = (cnt[r.mod]||0)+1);
       const fav = Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
       d.metrics = [[rs.length,T('Aktiviti dimainkan')],[days,T('Hari bermain')],[mins.toFixed(1)+' min',T('Purata masa setiap aktiviti')],[LABEL[fav]||fav,T('Aktiviti paling kerap')]];
-      const never = ['warna','arahan','siram','jejak'].filter(m=>!cnt[m]).map(m=>LABEL[m]);
+      const never = ['warna','arahan','siram','jejak','rama'].filter(m=>!cnt[m]).map(m=>LABEL[m]);
       if (never.length) d.notes.push(T('Belum dicuba: ') + never.join(', ') + '.');
-      if (mins > 5) d.notes.push(T('Purata aktiviti melebihi 5 minit. Pertimbangkan tahap lebih rendah atau sesi lebih pendek untuk mengekalkan perhatian.'));
+      if (mins > 8) d.notes.push(T('Purata aktiviti melebihi 8 minit. Pertimbangkan tahap lebih rendah atau sesi lebih pendek untuk mengekalkan perhatian.'));
     }
     d.tips = [T('Sesi pendek 10 hingga 15 minit dengan jadual visual.'),T('Puji usaha secara spesifik ("Bagus, kamu berhenti tepat pada garisan!").')];
     out.push(d); }

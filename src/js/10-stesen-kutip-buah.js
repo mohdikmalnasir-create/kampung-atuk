@@ -1,5 +1,5 @@
 /* ---------- station 1: kutip buah ---------- */
-let plan = [], stepIdx = 0, stepGot = 0, trial = 0, seqErr = 0, colErr = 0, replays = 0, hideAt = Infinity, hiddenPlan = false, between = false;
+let nTr = TRIALS, nRnd = 1, rnd = 0, roundGot = 0, roundWrong = 0, trialErr = 0, totalTarget = 0, plan = [], stepIdx = 0, stepGot = 0, trial = 0, seqErr = 0, colErr = 0, replays = 0, hideAt = Infinity, hiddenPlan = false, between = false;
 function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; }
 function planText(){
   if (LANG === 'en'){
@@ -16,12 +16,12 @@ function newTrial(){
   plan.forEach(s=>{ for (let i=0;i<s.n+2;i++) addFruit(s.key); });
   const others = A.cols.filter(k=>!plan.some(s=>s.key===k)), pool = others.length ? others : plan.map(s=>s.key);
   for (let i=0;i<A.distract;i++) addFruit(pool[i%pool.length]);
-  stepIdx = 0; stepGot = 0; hiddenPlan = false; hideAt = performance.now() + A.show;
+  stepIdx = 0; stepGot = 0; trialErr = 0; hiddenPlan = false; hideAt = performance.now() + A.show;
   renderSteps(); speak(planText());
 }
 function renderSteps(){
   $('dot').style.display = 'none';
-  $('goal').textContent = T('Arahan ') + Math.min(trial+1, TRIALS) + ' / ' + TRIALS;
+  $('goal').textContent = T('Arahan ') + Math.min(trial+1, nTr) + ' / ' + nTr;
   $('prog').innerHTML = '<span class="steps">' + plan.map((s,i)=>{
     const done = i < stepIdx, now = i === stepIdx, show = !hiddenPlan || done;
     const cnt = now ? stepGot + '/' + s.n : s.n;
@@ -35,12 +35,13 @@ function pickArahan(f){
     if (stepGot >= cur.n){ stepIdx++; stepGot = 0; }
     if (stepIdx >= plan.length){
       between = true; trial++; renderSteps(); sfx.ding();
-      if (trial >= TRIALS) setTimeout(()=>{ if (playing && state === 'buah') finishBuah(); }, 600);
+      adapt(trialErr === 0 ? true : trialErr >= 2 ? false : null);
+      if (trial >= nTr) setTimeout(()=>{ if (playing && state === 'buah') finishBuah(); }, 600);
       else { toast(T('Bagus! Arahan seterusnya...')); speak(T('Bagus!')); setTimeout(newTrial, 1600); }
     } else renderSteps();
     return;
   }
-  f.cool = true; f.shake = .5; wrong++; sfx.no();
+  f.cool = true; f.shake = .5; wrong++; trialErr++; sfx.no();
   if (plan.slice(stepIdx+1).some(s=>s.key===f.key)){ seqErr++; toast(hiddenPlan ? T('Belum lagi. Ingat urutan!') : T('Ikut urutan: ') + L(cur.key) + T(' dulu!')); }
   else { colErr++; toast(hiddenPlan ? T('Itu tiada dalam arahan.') : T('Itu ') + L(f.key) + T('. Tiada dalam arahan.')); }
 }
@@ -48,9 +49,14 @@ function startRound(){
   clearFruits(); hideOverlays();
   state = 'buah'; playing = true; dest = null; showStationsInWorld(false);
   got = 0; wrong = 0; seqErr = 0; colErr = 0; replays = 0; trial = 0; t0 = performance.now();
+  adReset(); nTr = nR('arahan'); nRnd = nR('warna'); rnd = 0; totalTarget = 0;
   $('stop').textContent = T('Berhenti');
   if (mode === 'arahan'){ newTrial(); return; }
-  plan = [];
+  colorRound();
+}
+function colorRound(){
+  if (!playing || state !== 'buah') return;
+  clearFruits(); plan = []; between = false; roundGot = 0; roundWrong = 0; totalTarget += level.target;
   goalKey = level.cols[Math.floor(Math.random()*level.cols.length)];
   const others = level.cols.filter(k=>k!==goalKey);
   for (let i=0;i<level.target;i++) addFruit(goalKey);
@@ -59,7 +65,13 @@ function startRound(){
   $('goal').textContent = T('Kutip ') + L(goalKey);
   updProg(); say();
 }
-function updProg(){ $('prog').textContent = got + ' / ' + level.target + T(' dalam bakul'); }
+function updProg(){ $('prog').textContent = roundGot + ' / ' + level.target + T(' dalam bakul') + (nRnd > 1 ? ' · ' + T('Pusingan ') + (rnd+1) + '/' + nRnd : ''); }
+function warnaRoundDone(){
+  rnd++; adapt(roundWrong === 0 ? true : roundWrong >= 3 ? false : null);
+  if (rnd >= nRnd) return finishBuah();
+  between = true; sfx.ding(); toast(T('Bakul penuh! Pusingan seterusnya...'));
+  setTimeout(()=>{ between = false; colorRound(); }, 1500);
+}
 function say(){
   if (state === 'buah' && mode === 'arahan' && plan.length) speak(planText());
   else if (state === 'buah') speak(cbMode ? T('Jom, kutip ') + L(goalKey) + '.' : T('Jom, kutip buah warna ') + COLORS[goalKey].nama + '.');
@@ -69,10 +81,10 @@ function finishBuah(){
   playing = false;
   const secs = (performance.now()-t0)/1000, acc = Math.round(got/(got+wrong)*100), ar = mode === 'arahan';
   lastErrs = wrong;
-  const rec = {mod:mode, tahap:level.n, warna:ar ? '' : COLORS[goalKey].nama, s:Math.round(secs), salah:wrong, acc, urutan:seqErr, warnaSalah:ar ? colErr : wrong, ulang:replays, n:ar ? got : level.target};
+  const rec = Object.assign({mod:mode, warna:ar ? '' : COLORS[goalKey].nama, s:Math.round(secs), salah:wrong, acc, urutan:seqErr, warnaSalah:ar ? colErr : wrong, ulang:replays, n:ar ? got : totalTarget}, adRec());
   const stats = ar
-    ? [[Math.round(secs)+' s',T('Masa')],[acc+'%',T('Ketepatan')],[seqErr,T('Salah urutan')],[colErr,T('Salah warna')],[replays,T('Minta ulang arahan')],[(secs/TRIALS).toFixed(0)+' s',T('Purata setiap arahan')]]
+    ? [[Math.round(secs)+' s',T('Masa')],[acc+'%',T('Ketepatan')],[seqErr,T('Salah urutan')],[colErr,T('Salah warna')],[replays,T('Minta ulang arahan')],[(secs/nTr).toFixed(0)+' s',T('Purata setiap arahan')]]
     : [[Math.round(secs)+' s',T('Masa')],[got,T('Kutipan betul')],[wrong,T('Sentuhan salah')],[acc+'%',T('Ketepatan')],[(secs/got).toFixed(1)+' s',T('Purata setiap buah')]];
   stationDone(rec, wrong === 0 ? T('Tepat semua') : T('Bakul penuh'),
-    ar ? watak.nama + T(' siap ') + TRIALS + T(' arahan di tahap ') + level.n + ' (' + level.ar.sub + ').' : watak.nama + T(' kutip ') + (cbMode ? L(goalKey) : LANG === 'en' ? COLORS[goalKey].nama + ' fruit' : 'buah ' + COLORS[goalKey].nama) + T(' di tahap ') + level.n + '.', stats);
+    ar ? watak.nama + T(' siap ') + nTr + T(' arahan, tahap tertinggi ') + ad.max + '.' : watak.nama + T(' kutip ') + (cbMode ? L(goalKey) : LANG === 'en' ? COLORS[goalKey].nama + ' fruit' : 'buah ' + COLORS[goalKey].nama) + T(' di tahap ') + level.n + '.', stats);
 }

@@ -9,7 +9,8 @@ function updConsentStatus(){
   el.innerHTML = c ? T('Persetujuan: <b>') + esc(consentLine(n)) + T('</b>. Tarik balik dalam Mod Induk.') : T('Tiada persetujuan lagi. Ibu bapa akan diminta setuju sebelum rekod disimpan.');
 }
 function beginDay(){
-  hideOverlays(); day = {masuk:'', keluar:'', done:new Set(), acts:[]};
+  hideOverlays(); day = {masuk:'', keluar:'', done:new Set(), acts:[], misi:todayMisi($('nama').value.trim()), hadiah:false};
+  loadKebun();
   player.position.set(0,0,0); player.rotation.y = 0; redrawLabels(); askFeeling('masuk');
   if (!recording) setTimeout(()=>toast(T('Mod tanpa rekod: keputusan tidak disimpan')), 400);
 }

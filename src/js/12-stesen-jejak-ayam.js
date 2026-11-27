@@ -9,15 +9,16 @@ function pathPt(n, t, s){
 }
 function startJejak(){
   state = 'jejak'; playing = false;
-  jj = {trial:0, t0:performance.now(), inside:0, out:0, offs:0};
+  adReset();
+  jj = {trial:0, t0:performance.now(), inside:0, out:0, offs:0, total:nR('jejak'), pathOffs:0};
   $('jejak').hidden = false; newPath();
 }
 function newPath(){
   const s = Math.random() < .5 ? 1 : -1;
   jj.pts = Array.from({length:JJ.N}, (_,i)=>pathPt(level.n, i/(JJ.N-1), s));
-  jj.tol = JJ.tol[level.n-1]; jj.prog = 0; jj.tr = false; jj.off = false; jj.busy = false;
+  jj.tol = JJ.tol[level.n-1]; jj.prog = 0; jj.tr = false; jj.off = false; jj.busy = false; jj.pathOffs = 0;
   drawJejak();
-  msgJj(T('Laluan ') + (jj.trial+1) + ' / ' + TRIALS + T(': letak jari di bulatan kuning.'), false);
+  msgJj(T('Laluan ') + (jj.trial+1) + ' / ' + jj.total + T(': letak jari di bulatan kuning.'), false);
 }
 function msgJj(t, bad){ const m = $('jjMsg'); m.textContent = t; m.classList.toggle('bad', !!bad); }
 function drawJejak(){
@@ -63,20 +64,21 @@ jsvg.addEventListener('pointermove', e=>{
     if (jj.prog >= P.length-4) donePath();
   } else {
     jj.out++;
-    if (!jj.off){ jj.off = true; jj.offs++; sfx.no(); $('cor').classList.add('bad'); msgJj(T('Terkeluar jejak. Balik ke bulatan kuning.'), true); }
+    if (!jj.off){ jj.off = true; jj.offs++; jj.pathOffs++; sfx.no(); $('cor').classList.add('bad'); msgJj(T('Terkeluar jejak. Balik ke bulatan kuning.'), true); }
   }
 });
 ['pointerup','pointercancel'].forEach(ev=>jsvg.addEventListener(ev, ()=>{ jj.tr = false; }));
 function donePath(){
   jj.busy = true; jj.tr = false; jj.trial++; sfx.ok(); sfx.ding();
+  adapt(jj.pathOffs === 0 ? true : jj.pathOffs >= 3 ? false : null);
   msgJj(T('Ibu ayam jumpa sarang!'), false); speak(T('Bagus! Ibu ayam jumpa sarang.'));
-  setTimeout(()=>{ if (state !== 'jejak') return; if (jj.trial >= TRIALS) finishJejak(); else newPath(); }, 1500);
+  setTimeout(()=>{ if (state !== 'jejak') return; if (jj.trial >= jj.total) finishJejak(); else newPath(); }, 1500);
 }
 function finishJejak(){
   const secs = (performance.now()-jj.t0)/1000, acc = Math.round(jj.inside/Math.max(1, jj.inside+jj.out)*100);
   lastErrs = jj.offs;
-  const rec = {mod:'jejak', tahap:level.n, s:Math.round(secs), salah:jj.offs, acc, dalam:jj.inside, luar:jj.out};
+  const rec = Object.assign({mod:'jejak', s:Math.round(secs), salah:jj.offs, acc, dalam:jj.inside, luar:jj.out, laluan:jj.total}, adRec());
   stationDone(rec, jj.offs === 0 ? T('Jejak sempurna') : T('Semua sarang dijumpai'),
-    watak.nama + T(' ikut ') + TRIALS + T(' jejak di tahap ') + level.n + ' (' + STATIONS[2].subs[level.n-1].toLowerCase() + ').',
-    [[Math.round(secs)+' s',T('Masa')],[acc+'%',T('Ketepatan dalam jejak')],[jj.offs,T('Kali terkeluar')],[(secs/TRIALS).toFixed(0)+' s',T('Purata setiap laluan')]]);
+    watak.nama + T(' ikut ') + jj.total + T(' jejak, tahap tertinggi ') + ad.max + '.',
+    [[Math.round(secs)+' s',T('Masa')],[acc+'%',T('Ketepatan dalam jejak')],[jj.offs,T('Kali terkeluar')],[(secs/jj.total).toFixed(0)+' s',T('Purata setiap laluan')]]);
 }

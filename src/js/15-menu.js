@@ -15,3 +15,10 @@ $('cuba').addEventListener('click', ()=>speak(T('Assalamualaikum. Jom tolong Atu
   b.setAttribute('aria-pressed', LANG === mine);
   b.addEventListener('click', ()=>{ if (LANG === mine) return; store.set('ka.lang', mine); try { location.reload(); } catch(e) {} });
 });
+function drawOpts(){
+  $('lenSeg').innerHTML = TEMPOH.map(k=>'<button class="lg" type="button" data-len="'+k+'" aria-pressed="'+(k === tempoh)+'">'+TEMPOH_NAMA[k]+'</button>').join('');
+  $('adBtn').textContent = adaptif ? T('Hidup') : T('Mati'); $('adBtn').setAttribute('aria-pressed', adaptif);
+}
+$('lenSeg').addEventListener('click', e=>{ const b = e.target.closest('[data-len]'); if (!b) return; tempoh = b.dataset.len; store.set('ka.tempoh', tempoh); drawOpts(); });
+$('adBtn').addEventListener('click', ()=>{ adaptif = !adaptif; store.set('ka.adaptif', adaptif ? '1' : '0'); drawOpts(); });
+drawOpts();
